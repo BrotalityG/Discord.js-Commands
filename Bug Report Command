@@ -1,0 +1,37 @@
+const Discord = require('discord.js')
+const client = new Discord.Client();
+const { prefix, token } = require('./auth.json') //example of auth.json found in main repository
+const myID = 'IDHERE' //replace IDHERE with your user ID
+var lockedList = ['userID1', 'userID2']; //replace the userID stuff here with the ID's of the users you want to blacklist
+
+client.on('ready', () => {
+  console.log('Ready!');
+});
+
+client.on('message', async message => {
+    if (message.author.bot) return;
+
+    const args = message.content.slice(prefix.length).split(/ +/);
+    const command = args.shift().toLowerCase();
+
+    if (command === 'bugreport') {
+        const person = message.author.username
+        const userID = message.author.id
+
+        if (userID == lockedList) {
+            message.channel.send('***You have abused this feature before and as such have been put on a blacklist***')
+        } else {
+            let bug = args.slice(0).join(' ');
+            if (!bug) {
+                message.channel.send('You are attempting to send a bug report without listing a bug!')
+            } else {
+                client.fetchUser(myID).then((user) => {
+                    user.send(`${person} of ${message.guild.name} (Guild ID: ${message.guild.id}, User ID: ${userID}) reported the bug: ${bug}`);
+                });
+                message.channel.send('**Your bug was reported. If you abuse this feature you will be put on a blacklist and will be prevented from using this command.**');
+            };
+        };
+    };
+});
+
+client.login(token);
